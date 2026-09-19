@@ -1,0 +1,22 @@
+{
+  "name": "workday-autofill-ai",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI-powered Chrome extension for automated Workday job application filling",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["workday", "chrome-extension", "autofill", "ai"],
+  "author": "Hidani Tech",
+  "license": "ISC",
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.7.1",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "mammoth": "^1.12.3",
+    "pdfjs-dist": "^6.3.289"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Workday AutoFill AI",
+  "version": "1.0.0",
+  "description": "AI-powered Chrome extension for automated job application filling on Workday platforms",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "sidePanel",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.myworkdayjobs.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.myworkdayjobs.com/*"],
+      "js": ["src/content/content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "side_panel": {
+    "default_path": "src/sidepanel/sidepanel.html"
+  },
+  "action": {
+    "default_icon": "src/assets/icon128.png",
+    "default_title": "Workday AutoFill AI"
+  },
+  "icons": {
+    "16": "src/assets/icon16.png",
+    "48": "src/assets/icon48.png",
+    "128": "src/assets/icon128.png"
+  }
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workday AutoFill AI</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Workday AutoFill AI</h1>
+      <span class="subtitle">Target Application Automation</span>
+    </header>
+
+    <div id="tabs">
+      <button class="tab active" data-tab="upload">Upload</button>
+      <button class="tab" data-tab="profile">Profile</button>
+      <button class="tab" data-tab="review">Review</button>
+      <button class="tab" data-tab="settings">Settings</button>
+      <button class="tab" data-tab="log">Log</button>
+    </div>
+
+    <div id="upload-tab" class="tab-content active">
+      <div class="section">
+        <h2>Resume Upload</h2>
+        <div id="drop-zone" class="drop-zone">
+          <p>Drag & drop your resume here</p>
+          <p class="small">or click to select file</p>
+          <input type="file" id="file-input" accept=".pdf,.docx,.txt" hidden>
+        </div>
+        <div id="upload-status" class="status hidden"></div>
+      </div>
+
+      <div class="section">
+        <h2>Parsed Profile</h2>
+        <div id="profile-preview" class="profile-preview">
+          <p class="muted">Upload a resume to see parsed data</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <button id="btn-autofill" class="btn primary" disabled>Start Autofill</button>
+        <button id="btn-stop" class="btn danger hidden">Stop</button>
+      </div>
+
+      <div id="progress-section" class="section hidden">
+        <h2>Progress</h2>
+        <div id="progress-bar" class="progress-bar">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="progress-text" class="progress-text">Ready</div>
+        <div id="progress-log" class="progress-log"></div>
+      </div>
+    </div>
+
+    <div id="review-tab" class="tab-content">
+      <div class="section">
+        <h2>Fill Review</h2>
+        <p class="muted">Unresolved fields are listed first. Submit stays disabled until you confirm.</p>
+        <div id="review-list" class="review-list">
+          <p class="muted">Run autofill to see mapped fields</p>
+        </div>
+        <label class="confirm-row">
+          <input type="checkbox" id="confirm-submit">
+          I reviewed these values and confirm submission
+        </label>
+        <button id="btn-submit" class="btn primary" disabled>Submit application</button>
+        <div id="submit-status" class="status hidden"></div>
+      </div>
+    </div>
+
+    <div id="profile-tab" class="tab-content">
+      <div class="section">
+        <h2>Edit Profile</h2>
+        <p class="muted">Edit your parsed resume data below</p>
+        <textarea id="profile-editor" class="code-editor" rows="20"></textarea>
+        <button id="btn-save-profile" class="btn primary">Save Profile</button>
+      </div>
+    </div>
+
+    <div id="settings-tab" class="tab-content">
+      <div class="section">
+        <h2>API Configuration</h2>
+        <label for="api-key">Gemini API Key</label>
+        <input type="password" id="api-key" class="input" placeholder="AIza...">
+        <button id="btn-save-key" class="btn primary">Save Key</button>
+        <div id="key-status" class="status hidden"></div>
+      </div>
+    </div>
+
+    <div id="log-tab" class="tab-content">
+      <div class="section">
+        <h2>Activity Log</h2>
+        <div id="log-container" class="log-container"></div>
+        <button id="btn-clear-log" class="btn secondary">Clear Log</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js" type="module"></script>
+</body>
+</html>
