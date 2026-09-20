@@ -3,7 +3,7 @@
 
 > **Selected: Target — ETL GM Food Sales (R0000452117)**
 
-AI-powered Chrome extension for automated job application filling on Workday platforms. Uses semantic field mapping with OpenAI to intelligently fill complex multi-step Workday forms.
+AI-powered Chrome extension for automated job application filling on Workday platforms. Uses semantic field mapping with Google Gemini to intelligently fill complex multi-step Workday forms.
 
 ## Features
 
@@ -35,7 +35,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full architecture details.
 
 ## AI Strategy
 
-- **Resume parsing**: GPT-4o-mini with structured JSON output
+- **Resume parsing**: Gemini 3.5 Flash Lite with structured JSON output
 - **Field mapping**: Batch per-step API calls with confidence scoring
 - **Question answering**: Rule-based for common questions, AI for complex ones
 

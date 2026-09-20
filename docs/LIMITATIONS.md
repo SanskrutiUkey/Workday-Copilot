@@ -1,62 +1,71 @@
-# Workday AutoFill AI - Limitations
+# Workday AutoFill AI — System Limitations & Boundaries
 
-## Scope
+This document defines the operational boundaries, intentionally non-automated workflows, security mitigations, and known edge cases of the extension.
 
-This extension is designed and tested specifically for **Target Corporation** Workday applications. While the architecture supports other Workday tenants, testing has been limited to Target's `targetcareers` portal.
+---
 
-## Known Limitations
+## 1. Assessment & Skill Test Modules
 
-### Workday Platform
-- **Custom tenant steps**: Each Workday tenant can customize application steps. The extension detects steps by `data-automation-id` patterns, which may vary.
-- **Assessment questions**: Complex assessment questions (situational judgment, personality tests) are not automated.
-- **File upload size**: Limited by browser memory; very large files (>10MB) may fail.
-- **Shadow DOM**: Closed shadow DOM components cannot be accessed (browser security restriction).
-- **Cross-origin iframes**: Some Workday pages use cross-origin iframes that content scripts cannot access.
+* **Scope Limit**: Workday job applications occasionally include external or embedded assessment modules (e.g., timed coding tests, logical reasoning quizzes, video interviews, or personality assessments).
+* **Behavior**: The extension **does not attempt to solve or complete assessment modules**.
+* **User Action**: When an assessment step appears, the extension pauses and yields control to the applicant.
 
-### Field Mapping
-- **Custom fields**: Tenant-specific custom fields may not have deterministic mappings.
-- **Complex dropdowns**: Nested or cascading dropdowns may not be fully supported.
-- **Dynamic options**: Dropdown options loaded asynchronously may be missed if they load after detection.
-- **Conditional fields**: Fields that appear/disappear based on previous answers may be missed.
+---
 
-### Resume Parsing
-- **Scanned PDFs**: Image-only PDFs cannot be parsed (no OCR implemented).
-- **Non-standard formats**: Unusual resume layouts may produce incomplete extraction.
-- **Multiple languages**: Only English resumes are supported.
-- **Tables/columns**: Complex layouts may produce garbled text extraction.
+## 2. Intentional Omission of Uninferable Application Questions
 
-### Question Answering
-- **EEO/Voluntary**: Protected characteristics (gender, race, ethnicity, veteran status, disability) are never inferred from resumes. The extension defaults to "I don't wish to answer."
-- **Open-ended questions**: Long-form questions (essays, descriptions) are not generated.
-- **Experience-specific**: Years of specific experience are not reliably inferred.
-- **Certification verification**: Cannot verify certifications or licenses.
+* **Scope Limit**: Fields requiring information absent from standard resume documents are intentionally left un-filled.
+* **Affected Question Types**:
+  - Work authorization details (CPT, OPT, H-1B transfer timeline)
+  - Work visa sponsorship requirements
+  - Non-compete / non-solicitation agreement confirmations
+  - Start date availability & shift/holiday preferences
+  - Prior employment at specific subsidiary or parent companies
+  - Referral sources or employee reference details
+  - Specific quantified leadership numbers not explicitly present in the resume text
+* **Behavior**: `mapper.js` detects these question patterns via `canInferFromResume()`, blocks AI mapping (`method: "inference_blocked"`), leaves the field **BLANK**, and flags it in the **Fill Review** panel.
+* **User Action**: The applicant must manually answer flagged questions before proceeding.
 
-### Security & Privacy
-- **API key storage**: Stored in `chrome.storage.local` (encrypted by Chrome, but not zero-knowledge).
-- **Resume data**: Stored locally only; never sent to third parties except OpenAI for parsing.
-- **Authentication**: Login is never automated (explicit requirement).
-- **Submission**: Always requires explicit user confirmation before submitting.
+---
 
-### Technical
-- **Manifest V3**: Limited by Chrome extension API restrictions.
-- **Performance**: Large resumes (>5 pages) may cause slow parsing.
-- **Memory**: Long-running autofill sessions may consume significant memory.
-- **Browser compatibility**: Chrome-only (Manifest V3).
+## 3. Equal Employment Opportunity (EEO) & Voluntary Disclosures
 
-## Not Implemented
+* **Scope Limit**: Federal EEO and voluntary disclosure questions (gender, race, ethnicity, Hispanic/Latino origin, veteran status, disability status).
+* **Behavior**: The extension **never infers or auto-selects affirmative choices** for demographic questions. It defaults all EEO fields to `"Prefer not to answer"` or `"Decline to answer"`.
+* **User Action**: If the applicant wishes to self-disclose demographic information, they must manually select their preferences on the form or during review.
 
-- Other ATS platforms (Greenhouse, Lever, iCIMS)
-- Cover letter generation
-- Job search/matching
-- Application tracking
-- Multiple resume profiles
-- Automatic resume tailoring
-- Assessment completion
+---
 
-## Recommendations
+## 4. Missing Profile Data & Address Fields
 
-1. **Always review** the autofill results before submitting
-2. **Manually verify** EEO/voluntary questions
-3. **Check flagged fields** in the review screen
-4. **Test with a backup** resume before using on real applications
-5. **Keep API key secure** and rotate periodically
+* **Scope Limit**: Required fields (e.g., physical street address, emergency contact, phone extension) that are completely omitted from the uploaded resume.
+* **Behavior**: The extension skips empty values and logs an incomplete field entry. It does not generate dummy addresses or synthetic placeholders.
+* **User Action**: The applicant must enter missing personal information directly into the Workday portal.
+
+---
+
+## 5. Workday Tenant & Customization Variability
+
+* **Scope Limit**: Workday UI layouts vary across different corporate tenants (e.g., Target, NVIDIA, custom enterprise portals).
+* **Behavior**: 
+  - The deterministic map (`AUTOMATION_ID_MAP`) and step detector (`STEP_IDS`) are optimized for standard Workday field automation IDs (`formField-legalName--firstName`, `applyFlowMyInfoPage`, `bottom-navigation-submit-button`).
+  - Highly customized tenant templates with non-standard DOM structures or obscured data attributes rely on the heuristic and AI fallback layers, which may experience lower confidence scores.
+* **Mitigation**: New tenant-specific automation IDs can be added to [constants.js](file:///D:/Hidani-Tech/src/lib/constants.js#L1).
+
+---
+
+## 6. Security, PII Handling & Privacy Mitigation
+
+* **PII Transmission**: Resume text containing Personally Identifiable Information (PII) is sent to the Google Gemini API for parsing and step field mapping.
+* **Privacy Mitigations**:
+  - **User-Provided API Key**: The user supplies their own Gemini API key in the side panel settings.
+  - **No Central Server**: The extension runs entirely locally in the user's browser; there is no intermediate backend server or proxy collecting user data.
+  - **Local Storage Only**: API keys and parsed profile JSON are stored exclusively in `chrome.storage.local`.
+  - **No Prompt Logging**: Requests are sent directly over HTTPS to Google Generative Language APIs with no third-party logging.
+
+---
+
+## 7. Authentication & Final Submission Guardrails
+
+* **Login & Registration**: The extension **never automates login, password entry, or account creation**. If an authentication screen is detected, execution pauses until the user completes authentication.
+* **Final Submission**: Final application submission is **never automatically clicked during autofill runs**. Submission requires the user to explicitly open the review tab, check the confirmation box, and click **Submit application**.

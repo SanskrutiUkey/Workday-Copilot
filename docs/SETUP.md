@@ -1,81 +1,81 @@
-# Workday AutoFill AI - Setup Guide
+# Workday AutoFill AI — Setup & Installation Guide
 
-## Prerequisites
-- Node.js 18+ installed
-- Google Chrome browser
-- OpenAI API key (for AI-powered field mapping)
+This document outlines the prerequisites, installation instructions, build workflow, API key configuration, and execution mode configuration for the **Workday AutoFill AI Chrome Extension**.
 
-## Installation
+---
 
-### 1. Clone the repository
-```bash
-git clone <repository-url>
-cd Hidani-Tech
-```
+## 1. Prerequisites
 
-### 2. Install dependencies
-```bash
-npm install
-```
+Before installing and running the extension, ensure your local development environment meets the following requirements:
 
-### 3. Build the extension
-```bash
-npm run build
-```
+- **Node.js**: `v18.0.0` or higher (tested on Node.js v20+)
+- **npm**: `v9.0.0` or higher
+- **Google Chrome**: Version 116+ (requires native support for Manifest V3 side panel APIs `chrome.sidePanel`)
+- **Target Application Page**: A active Workday job application posting (e.g., target Workday tenant application URL).
 
-### 4. Load in Chrome
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in top-right)
-3. Click "Load unpacked"
-4. Select the `dist` folder from the project directory
+---
 
-### 5. Configure API Key
-1. Click the extension icon in Chrome toolbar
-2. Side panel will open
-3. Go to "Settings" tab
-4. Enter your OpenAI API key
-5. Click "Save Key"
+## 2. Project Installation & Build Steps
 
-### 6. Using the Extension
-1. Navigate to a Workday job application (e.g., Target careers)
-2. Click the extension icon to open the side panel
-3. Go to "Upload" tab
-4. Drag & drop or click to upload your resume (PDF, DOCX, or TXT)
-5. Review the parsed profile data
-6. Click "Start Autofill"
-7. The extension will automatically fill all fields and navigate through steps
-8. Review the final screen before submitting
+1. **Clone or Navigate to Project Directory**:
+   ```bash
+   cd D:\Hidani-Tech
+   ```
 
-## Development
+2. **Install Dependencies**:
+   Install devDependencies (Vite, CRXJS plugin) and dependencies (`mammoth` for DOCX parsing, `pdfjs-dist` for PDF parsing):
+   ```bash
+   npm install
+   ```
 
-### Watch mode (auto-rebuild)
-```bash
-npm run dev
-```
+3. **Build Extension Bundle**:
+   To compile content scripts, side panel UI, background service worker, and assets into the `dist/` directory, run:
+   ```bash
+   npm run build
+   ```
+   *Note: For live development and hot module reloading, you can run `npm run dev`.*
 
-### Rebuild after changes
-```bash
-npm run build
-```
+4. **Load Unpacked Extension into Chrome**:
+   - Open Chrome and navigate to `chrome://extensions`.
+   - Toggle **Developer mode** in the top-right corner to **ON**.
+   - Click **Load unpacked**.
+   - Select the `D:\Hidani-Tech\dist` folder.
+   - The **Workday AutoFill AI** extension will now appear in your extensions toolbar.
 
-Then reload the extension in `chrome://extensions/`.
+---
 
-## Testing
-Test with the provided Target job posting:
-https://target.wd5.myworkdayjobs.com/en-US/targetcareers/details/ETL-GM---Food-Sales_R0000452117
+## 3. Configuring the AI API Key
 
-## Troubleshooting
+The extension relies on Google Gemini (`gemini-3.5-flash-lite`) for AI resume parsing and fallback field mapping. 
 
-### Extension not detecting fields
-- Ensure you're on a `*.myworkdayjobs.com` page
-- Try refreshing the page and re-opening the side panel
+> [!IMPORTANT]
+> The API key is **never hardcoded** in source files and **never committed** to repository history. It is securely stored locally in the browser's extension storage (`chrome.storage.local`).
 
-### Autofill not working
-- Check that the API key is configured in Settings tab
-- Verify the resume was parsed successfully (check Profile tab)
-- Look at the Log tab for error messages
+### Steps to Configure Key:
+1. Click the **Workday AutoFill AI** action icon in your Chrome toolbar to open the **Side Panel**.
+2. Click on the **Settings** tab.
+3. Paste your Google Gemini API key into the **Gemini API Key** field (starts with `AIza...`).
+4. Click **Save Key**.
+5. The status will update to **"API key configured"**. All background service worker AI requests will now attach this stored key dynamically.
 
-### Resume parsing fails
-- Ensure the PDF contains extractable text (not scanned images)
-- Try converting DOCX to a simpler format
-- Check API key is valid
+---
+
+## 4. Dry-Run Mode vs Live Mode
+
+The extension supports safe evaluation before performing real action on application portals.
+
+### Dry-Run Mode (Review Mode)
+* **How it works**:
+  1. Upload your resume (PDF/DOCX) in the **Upload** tab.
+  2. Click **Start Autofill**.
+  3. The extension navigates, parses fields, runs the deterministic/heuristic/AI mapping pipeline, and inputs values into fields on the active Workday step.
+  4. Once all steps complete or reach the **Review** step (`applyFlowReviewPage`), the extension **pauses automatically** and presents all mapped fields in the **Fill Review** side panel tab.
+  5. It logs all decision confidence scores, field paths, and reasoning into the **Activity Log** without triggering the final form submission.
+
+### Live Mode (Final Submission)
+* **How it works**:
+  1. Open the **Review** tab in the side panel after autofill completes.
+  2. Inspect the populated values and resolve any flagged fields.
+  3. Explicitly check the confirmation box: `[x] I reviewed these values and confirm submission`.
+  4. Click **Submit application**.
+  5. The extension locates the submit element on the Workday page (`[data-automation-id="bottom-navigation-submit-button"]`, `pageFooterSubmitButton`, or matching ARIA submit elements) and performs the final submit click.
