@@ -211,6 +211,8 @@ export async function fillDropdown(triggerElement, value) {
       else search.value = strValue;
     }
     search.dispatchEvent(new Event('input', { bubbles: true }));
+    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+    search.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', keyCode: 13, which: 13, bubbles: true }));
     await sleep(500);
   } else {
     log(`No search input found in list`);
@@ -246,7 +248,7 @@ export async function fillDropdown(triggerElement, value) {
     }
   }
 
-  const match = findBestMatch(strValue, optionTexts);
+  let match = strValue === 'FIRST_OPTION' || strValue === '__FIRST__' ? optionTexts[0] : findBestMatch(strValue, optionTexts);
 
   log(`Best match for "${strValue}": ${match || 'NONE'}`);
 
@@ -260,9 +262,8 @@ export async function fillDropdown(triggerElement, value) {
         return true;
       }
     }
-    log(`No match at all, closing dropdown`);
-    document.body.click();
-    return false;
+    log(`No match at all, falling back to first option: "${optionTexts[0]}"`);
+    match = optionTexts[0];
   }
 
   for (const opt of options) {

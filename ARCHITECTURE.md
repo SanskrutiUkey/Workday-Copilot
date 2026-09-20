@@ -83,7 +83,7 @@ flowchart LR
 
 3. **Tier 3: AI Resolution (Batched Per-Step API Call)**
    * Groups all remaining unresolved fields on the current step into a single JSON batch.
-   * Sends the batch to the Gemini API (`gemini-3.6-flash`) via `service-worker.js`.
+   * Sends the batch to the Gemini API (`gemini-3.5-flash-lite`) via `service-worker.js`.
    * Maps unstandardized application questions based on explicit context in the parsed resume profile.
 
 ---

@@ -377,6 +377,7 @@ export async function runAutofill(resumeJson, onProgress, options = {}) {
             label: 'Resume/CV',
             widgetType: WIDGET_TYPES.FILE,
             method: 'direct_upload',
+            value: options.resumeFile.name || 'Uploaded File',
             confidence: 1.0,
             success: ok,
             reason: ok ? 'uploaded' : 'upload_failed'
@@ -397,7 +398,7 @@ export async function runAutofill(resumeJson, onProgress, options = {}) {
         }
       }
 
-      const fieldsForMapping = nonRepeatableFields.filter(f => f.automationId !== 'file-upload-input-ref');
+      const fieldsForMapping = nonRepeatableFields.filter(f => f.automationId !== 'file-upload-input-ref' && f.widgetType !== WIDGET_TYPES.FILE && !/file|resume|cv/i.test(f.automationId || ''));
       const mappings = await mapFields(fieldsForMapping, resumeJson);
 
       let fillResults;
@@ -410,7 +411,43 @@ export async function runAutofill(resumeJson, onProgress, options = {}) {
         }));
       } else {
         const fillable = mappings.filter(m => m.automationId !== 'formField-acceptTermsAndAgreements' || resumeJson.meta?.acceptTerms === true);
+        for (const f of fillable) {
+          if (/source|how did you hear/i.test(f.label || '') || /source/i.test(f.automationId || '')) {
+            f.value = 'Target.com/careers';
+          }
+        }
         fillResults = await fillAllFields(fillable);
+
+        for (const res of fillResults) {
+          if (/source|how did you hear/i.test(res.label || '') || /source/i.test(res.automationId || '')) {
+            res.method = 'ai_flagged';
+            res.reason = 'Source selection requires user verification';
+          }
+        }
+
+        if (currentStep === STEP_IDS.MY_INFO) {
+          await sleep(500);
+          const refreshedFields = discoverFields();
+          const subSourceField = refreshedFields.find(f => 
+            !nonRepeatableFields.some(orig => orig.element === f.element) &&
+            f.widgetType === WIDGET_TYPES.DROPDOWN &&
+            (/source|website|how did you hear|specify|detail/i.test(f.label || '') || /source|subsource/i.test(f.automationId || ''))
+          );
+          if (subSourceField) {
+            await appendLog({ type: 'info', message: 'Detected sub-source field, searching "Target.com/careers"' });
+            const subResult = await fillAllFields([{
+              ...subSourceField,
+              value: 'Target.com/careers',
+              method: 'ai_flagged',
+              confidence: 0.7,
+              reason: 'Searched Target.com/careers — please verify'
+            }]);
+            for (const sr of subResult) {
+              sr.method = 'ai_flagged';
+            }
+            fillResults.push(...subResult);
+          }
+        }
       }
       results.push(...fillResults);
 

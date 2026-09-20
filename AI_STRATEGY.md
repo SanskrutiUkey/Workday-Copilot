@@ -6,8 +6,8 @@ This document details the AI model selection, prompts, JSON schemas, confidence 
 
 ## 1. AI Model Selection & Rationale
 
-* **Selected Model**: Google Gemini (`gemini-3.6-flash`) via the Google AI REST API (`generativelanguage.googleapis.com`).
-* **Why `gemini-3.6-flash`?**:
+* **Selected Model**: Google Gemini (`gemini-3.5-flash-lite`) via the Google AI REST API (`generativelanguage.googleapis.com`).
+* **Why `gemini-3.5-flash-lite`?**:
   1. **Low Latency & High Speed**: Delivers step-mapping completions in under 1 second, keeping application execution fast.
   2. **Native JSON Schema Enforcement**: Supports `responseMimeType: "application/json"` and `responseSchema` definitions, guaranteeing deterministic JSON structures without parsing errors.
   3. **Cost Efficiency**: Priced at a fraction of larger reasoning models while maintaining high accuracy for context-aware text extraction and classification.

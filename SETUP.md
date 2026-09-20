@@ -46,7 +46,7 @@ Before installing and running the extension, ensure your local development envir
 
 ## 3. Configuring the AI API Key
 
-The extension relies on Google Gemini (`gemini-3.6-flash`) for AI resume parsing and fallback field mapping. 
+The extension relies on Google Gemini (`gemini-3.5-flash-lite`) for AI resume parsing and fallback field mapping. 
 
 > [!IMPORTANT]
 > The API key is **never hardcoded** in source files and **never committed** to repository history. It is securely stored locally in the browser's extension storage (`chrome.storage.local`).

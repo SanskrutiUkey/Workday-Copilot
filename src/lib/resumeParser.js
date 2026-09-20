@@ -17,7 +17,7 @@ export function normalizeProfile(profile) {
   }
   profile.meta = profile.meta || {};
   if (!profile.meta.previousWorker) profile.meta.previousWorker = 'No';
-  if (!profile.meta.source) profile.meta.source = 'Indeed';
+  if (!profile.meta.source) profile.meta.source = 'Target.com/careers';
   profile.meta.eeo = profile.meta.eeo || {};
   if (profile.meta.acceptTerms !== true) profile.meta.acceptTerms = false;
   profile.experience = profile.experience || [];
@@ -77,7 +77,7 @@ export async function parseResumeWithAI(rawText) {
   const response = await chrome.runtime.sendMessage({
     type: 'AI_REQUEST',
     payload: {
-      model: 'gemini-3.6-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: [{ role: 'user', parts: [{ text: rawText }] }],
       systemInstruction: {
         parts: [{

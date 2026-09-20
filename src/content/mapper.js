@@ -192,7 +192,7 @@ async function aiMapFields(fields, resumeJson) {
     const response = await chrome.runtime.sendMessage({
       type: 'AI_REQUEST',
       payload: {
-        model: 'gemini-3.6-flash',
+        model: 'gemini-3.5-flash-lite',
         contents: [{ role: 'user', parts: [{ text: JSON.stringify({ fields: promptFields, resume: resumeJson }) }] }],
         systemInstruction: {
           parts: [{
